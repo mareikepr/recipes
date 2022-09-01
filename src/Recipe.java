@@ -141,7 +141,7 @@ public class Recipe {
     public boolean recipeExistsInFile (String keyword) {
         String fileContent = readInFile();
         //System.out.println("Content of file: " + fileContent);
-        boolean recipeContained = fileContent.contains(" " + keyword + " ");
+        boolean recipeContained = fileContent.contains(keyword);
         if (recipeContained == true) {System.out.println("Recipe \"" + keyword + "\" is contained.");}
 
         return recipeContained;
