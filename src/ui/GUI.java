@@ -7,7 +7,6 @@ import javax.swing.JPanel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileNotFoundException;
 import javax.swing.*;
 
 public class GUI {
@@ -37,7 +36,6 @@ public class GUI {
     JButton mySaveButton = new JButton("Save new recipe");
 
     // Textfield for new recipes
-
     JTextArea myTextName = new JTextArea(2,30);
     JTextArea myTextTime = new JTextArea(2,30);
     JTextArea myTextIngredients = new JTextArea(40,30);
@@ -54,16 +52,42 @@ public class GUI {
         myFrame.add(myPanel);
         myPanel.add(myLabel);
         myPanel.add(myStartButton);
-        myStartButton.addActionListener(new StartButtonActionListener());
+        //myStartButton.addActionListener(new StartButtonActionListener());
+
+        // Options
+        myStartButton.addActionListener(e -> startAction());         // Lambda
+        myStartButton.addActionListener(this::actionPerformed);      // method reference (lambda expression for single method)
+
+        myStartButton.addActionListener(this::startActionLambda);
+        myStartButton.addActionListener(e -> startActionLambda(e));
+
+
         myFrame.setSize(400, 400);
         myFrame.setVisible(true);
 
-        // domain.Recipe window
+        // Recipe window
         myRecipeFrame.add(myRecipePanel);
         myRecipePanel.add(myRecipeLabel);
+        String [] recipeNamesListStringArray = recipeService.getRecipeNames().toArray(String[]::new);
+        JList<String> myRecipeNamesList = new JList<>(recipeNamesListStringArray);
+        myRecipePanel.add(myRecipeNamesList);
         myRecipePanel.add(myAddButton);
-        myRecipeLabel.setText(("domain.Recipe"));
-        myAddButton.addActionListener(new AddButtonActionListener());
+        myRecipeLabel.setText(("Recipe"));
+
+        // With new class:
+        //myAddButton.addActionListener(new AddButtonActionListener());
+        // Lambda expression
+        //myAddButton.addActionListener( a -> addAction());
+        //myAddButton.addActionListener( this::addAction());
+        // Anonyme Klasse:
+        ActionListener al = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addAction();
+            }
+        };
+        myAddButton.addActionListener(al);
+
         myRecipeFrame.setSize(600, 400);
 
         // Add recipe window
@@ -76,7 +100,7 @@ public class GUI {
         java.awt.GridBagConstraints gbc = new java.awt.GridBagConstraints();
 
         myAddLabel1.setText("Enter recipe: \n");
-        myAddLabel2.setText("domain.Recipe name: \n");
+        myAddLabel2.setText("Recipe name: \n");
         myAddLabel3.setText("Time: \n");
         myAddLabel4.setText("Ingredients (Format \"20g Mehl\"): ");
         myAddLabel5.setText("Instructions: \n");
@@ -128,32 +152,47 @@ public class GUI {
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         myAddPanel.add(myAddLabel1, gbc);
-        mySaveButton.addActionListener(new SaveButtonActionListener());
+        //mySaveButton.addActionListener(new SaveButtonActionListener());
+        mySaveButton.addActionListener( a -> saveAction());
 
         myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         myRecipeFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         myAddFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
-    public void startAction() {
+    // Options:
+    private void startActionLambda(ActionEvent e) {
         myFrame.setVisible(false);
         myRecipeFrame.setVisible(true);
-
     }
+    public void actionPerformed(ActionEvent e){
+        startAction();
+    }
+    private void startAction() {
+        myFrame.setVisible(false);
+        myRecipeFrame.setVisible(true);
+    }
+
+
+
+
     public void addAction() {
         myFrame.setVisible(false);
         myAddFrame.setVisible(true);
     }
-    public void saveAction() throws FileNotFoundException {
+
+    public void saveAction() {
 
         String name = myTextName.getText();
         String time = myTextTime.getText();
         String ingredients = myTextIngredients.getText();
         String instructions = myTextInstructions.getText();
 
-        recipeService.saveRecipe(name, time, ingredients, instructions);
+        recipeService.addRecipeToCollectionAndFile(name, time, ingredients, instructions);
+        recipeService.printCollection();
     }
 
+    /*
     private class StartButtonActionListener implements ActionListener {
 
         @Override
@@ -161,6 +200,7 @@ public class GUI {
             startAction();
         }
     }
+
     private class AddButtonActionListener implements ActionListener {
 
         @Override
@@ -168,6 +208,7 @@ public class GUI {
             addAction();
         }
     }
+
     private class SaveButtonActionListener implements ActionListener {
 
         @Override
@@ -179,7 +220,5 @@ public class GUI {
             }
         }
     }
-    // Alternative mit anonymer klasse, lambda
-
-
+    */
 }

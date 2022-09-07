@@ -7,7 +7,7 @@ public class Recipe {
     private final String recipeName;
     private final String recipeTime;
     private final String recipeInstructions;
-    private Map<String,String> recipeIngredients = new HashMap<String,String>();          // final?
+    private final Map<String,String> recipeIngredients;  // final?, HashMap Map
 
     public Recipe(String recipeName,
                   String recipeTime,
@@ -20,16 +20,28 @@ public class Recipe {
         this.recipeInstructions = recipeInstructions;
     }
 
-    public String getRecipeName() {
+    List<String> getIngredientsListString() {
+
+        Map<String, String> ingredientsMap = this.getRecipeIngredients();
+        List<String> ingredientsList = new ArrayList<>();
+
+        for(Map.Entry m : ingredientsMap.entrySet()) {
+            ingredientsList.add( m.getKey() + " ("+ m.getValue() + ")");
+        }
+        return ingredientsList;
+    }
+
+    String getRecipeName() {   // protected, in package, in derived class, default: in package
         return recipeName;
     }
-    public String getRecipeTime() {
+
+    String getRecipeTime() {
         return recipeTime;
     }
-    public String getRecipeInstructions() {
+    String getRecipeInstructions() {
         return recipeInstructions;
     }
-    public Map<String,String> getRecipeIngredients() {
+    Map<String,String> getRecipeIngredients() {
         return recipeIngredients;
     }
 }
