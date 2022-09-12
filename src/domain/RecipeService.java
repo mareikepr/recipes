@@ -3,18 +3,23 @@ package domain;
 import repository.RecipeRepositoryInterface;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.List;
 
 public class RecipeService {
 
     private RecipeCollection recipeCollection;
     private final RecipeRepositoryInterface recipeRepository;
+    private final ShoppingListServiceInterface shoppingListServiceInterface;
 
-    public RecipeService(RecipeRepositoryInterface recipeRepository) {
+    public RecipeService(RecipeRepositoryInterface recipeRepository, ShoppingListServiceInterface shoppingListServiceInterface) {
 
         this.recipeRepository = recipeRepository;
+        this.shoppingListServiceInterface = shoppingListServiceInterface;
+
         loadAllRecipes();
 
-        recipeCollection.searchAndPrintRecipe("Schokokuchen"); // test, normalerweise über ui
+        recipeCollection.searchAndPrintRecipe("Schokokuchen"); // test
         recipeCollection.printAllCollectedRecipes();
     }
 
@@ -22,54 +27,58 @@ public class RecipeService {
 
         recipeCollection = recipeRepository.loadRecipeCollectionFromFile();
     }
-    
+
     public void addRecipeToCollectionAndFile (String recipeName,
                             String recipeTime,
                             String recipeIngredients,
                             String recipeInstructions) {
 
-        Map<String, String> ingredientsMap = ingredientsStringToMap(recipeIngredients);
+        RecipeIngredients ingredientsList = ingredientsStringToList(recipeIngredients);
 
-        Recipe recipe = new Recipe(recipeName, recipeTime, ingredientsMap, recipeInstructions);
+        Map<String, String> ingredientsMap = ingredientsList.stream().collect(Collectors.toMap(RecipeIngredient::getAmount, RecipeIngredient::getAmount));
 
+        Recipe recipe = new Recipe(recipeName, recipeTime, ingredientsList, recipeInstructions);
 
         recipeCollection.add(recipe);
         recipeRepository.saveRecipeToFile(recipeName, recipeTime, ingredientsMap, recipeInstructions);
     }
 
+
     public void printShoppingList(List<String> recipeList) {
 
-        List<List<String>> shoppingList = new ArrayList<>();
+        // delete duplicates, sum up amounts
+        List<String> shoppingList = new ArrayList<>();
 
         for (String s : recipeList) {
             Recipe recipe = recipeCollection.searchAndGetRecipe(s);
-            shoppingList.add(recipe.getIngredientsListString());
+            shoppingList.add(recipe.getIngredientsListString().toString());
         }
 
-        System.out.println("\n Shopping list: " + shoppingList);
+        shoppingListServiceInterface.printShoppingList(shoppingList);
     }
+
     public List<String> getRecipeNames(){
 
         return recipeCollection.getRecipeNameList();
     }
 
-    private Map<String,String> ingredientsStringToMap(String ingredients) {
+    private RecipeIngredients ingredientsStringToList(String ingredients) {
 
-        HashMap<String, String> ingredientsHashMap = new HashMap<>();
+        RecipeIngredients ingredientsList = new RecipeIngredients();
         String[] splitIngredients = ingredients.split("\n");
-        String ingredientAmount;
-        String ingredientName;
 
         for (String splitIngredient : splitIngredients) {
 
-            ingredientAmount = splitIngredient.split("\s")[0]; // amount
-            ingredientName = splitIngredient.split("\s")[1]; // name
-            ingredientsHashMap.put(ingredientName, ingredientAmount); // put method from Collection (key,value)
+            String name = splitIngredient.split("\s")[0];
+            String amount = splitIngredient.split("\s")[1];
+            ingredientsList.add(new RecipeIngredient(amount, name));
         }
-        return ingredientsHashMap;
+
+        return ingredientsList;
     }
 
     public void printCollection() {
+
         recipeCollection.printAllCollectedRecipes();
     }
 }

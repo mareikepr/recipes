@@ -55,7 +55,7 @@ public class RecipeCollection {
         //allRecipes.stream().forEach(r -> printRecipe(r)); // with stream
     }
 
-    public void printRecipe(Recipe recipe) {                                  // Function of Collection or Recipe ?
+    public void printRecipe(Recipe recipe) {                              // Function of Collection or Recipe ?
 
         System.out.println("\nName:         " + recipe.getRecipeName());
         System.out.println("Time:         " + recipe.getRecipeTime());

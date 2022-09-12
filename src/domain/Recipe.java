@@ -7,11 +7,11 @@ public class Recipe {
     private final String recipeName;
     private final String recipeTime;
     private final String recipeInstructions;
-    private final Map<String,String> recipeIngredients;  // final?, HashMap Map
+    private final RecipeIngredients recipeIngredients;
 
     public Recipe(String recipeName,
                   String recipeTime,
-                  Map<String,String> recipeIngredients,
+                  RecipeIngredients recipeIngredients,
                   String recipeInstructions) {
 
         this.recipeName = recipeName;
@@ -22,26 +22,30 @@ public class Recipe {
 
     List<String> getIngredientsListString() {
 
-        Map<String, String> ingredientsMap = this.getRecipeIngredients();
+        RecipeIngredients recipeIngredients = this.getRecipeIngredients();
         List<String> ingredientsList = new ArrayList<>();
 
-        for(Map.Entry m : ingredientsMap.entrySet()) {
-            ingredientsList.add( m.getKey() + " ("+ m.getValue() + ")");
+        for( RecipeIngredient m : recipeIngredients.stream().toList()) {
+            ingredientsList.add( m.getName() + " ("+ m.getAmount() + ")");
         }
         return ingredientsList;
     }
 
-    String getRecipeName() {   // protected, in package, in derived class, default: in package
+    String getRecipeName() {   // protected: in package, in derived class, default: in package
+
         return recipeName;
     }
 
     String getRecipeTime() {
+
         return recipeTime;
     }
     String getRecipeInstructions() {
+
         return recipeInstructions;
     }
-    Map<String,String> getRecipeIngredients() {
+    RecipeIngredients getRecipeIngredients() {
+
         return recipeIngredients;
     }
 }

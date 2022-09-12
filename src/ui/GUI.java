@@ -173,9 +173,6 @@ public class GUI {
         myRecipeFrame.setVisible(true);
     }
 
-
-
-
     public void addAction() {
         myFrame.setVisible(false);
         myAddFrame.setVisible(true);

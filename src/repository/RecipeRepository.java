@@ -2,20 +2,22 @@ package repository;
 
 import domain.Recipe;
 import domain.RecipeCollection;
+import domain.RecipeIngredient;
+import domain.RecipeIngredients;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class RecipeRepository implements RecipeRepositoryInterface {
 
     private final String fileName = "MyRecipes.txt";
 
+    @Override
     public RecipeCollection loadRecipeCollectionFromFile () {
 
         String fileContent = readInFile();
-        return mapToRecipeCollection(fileContent);
+        return mapFileToRecipeCollection(fileContent);
     }
 
     private String readInFile () {
@@ -23,7 +25,7 @@ public class RecipeRepository implements RecipeRepositoryInterface {
         try {
             InputStreamReader reader = new InputStreamReader(new FileInputStream(fileName), StandardCharsets.UTF_8);
             int bufferSize = 1024;
-            char[] buffer = new char[bufferSize]; // new?
+            char[] buffer = new char[bufferSize];
             StringBuilder out = new StringBuilder();
             for (int numRead; (numRead = reader.read(buffer, 0, buffer.length)) > 0; ) {
                 out.append(buffer, 0, numRead);
@@ -32,20 +34,21 @@ public class RecipeRepository implements RecipeRepositoryInterface {
             return out.toString();
         } catch (IOException ex) {
             ex.printStackTrace();
-            return "ERROR";
+            return null;
         }
     }
 
-    private RecipeCollection mapToRecipeCollection(String fileContent) {        // Mapper Klassen ?
+    private RecipeCollection mapFileToRecipeCollection(String fileContent) {
 
         RecipeCollection recipeCollection = new RecipeCollection();
 
-        String[] recipeStringArray = splitFileToRecipes(fileContent);
+        List<String> recipeStringList = List.of(splitFileToRecipes(fileContent));
 
-        for (int i = 1; i < recipeStringArray.length; i++) {
-            Recipe recipe = extractRecipeFromString(recipeStringArray[i]);
+        for (String recipeString : recipeStringList) {
+            Recipe recipe = extractRecipeFromString(recipeString);
             recipeCollection.add(recipe);
         }
+
         return recipeCollection;
     }
 
@@ -64,29 +67,30 @@ public class RecipeRepository implements RecipeRepositoryInterface {
         ingredients = ingredients.replace("{","");
         ingredients = ingredients.replace("}","");
 
-        Map<String,String> ingredientsMap = new HashMap<>();
+        RecipeIngredients ingredientsMap = new RecipeIngredients();
 
-        for (int j = 0; j < ingredients.length(); j++) {
+        String[] ingredientsArray = ingredients.split(",");
 
-            String[] ingredientsArray = ingredients.split(",");
+        for ( String item : ingredientsArray ) {
 
-            //for  (int k = 0; k < ingredientsArray.length; k++) {
-            //    String key = ingredientsArray[k].split("=")[0];
-            //    String value = ingredientsArray[k].split("=")[1];
-            //    ingredientsMapHelper.put(key,value);
-            //}
-            for ( String item : ingredientsArray ) {
-                ingredientsMap.put(item.split("=")[0],item.split("=")[1]);
-            }
+            String ingrName = item.split("=")[0];
+            String ingrAmount = item.split("=")[1];
+
+            ingredientsMap.add(new RecipeIngredient(ingrName, ingrAmount));
         }
 
         return new Recipe(name,time,ingredientsMap,instructions);
     }
 
     private String[] splitFileToRecipes(String fileContent) {
-        return fileContent.split("###");
+
+        String[] recipeArray = fileContent.split("###");
+        recipeArray = Arrays.copyOfRange(recipeArray, 1, recipeArray.length - 1);
+
+        return recipeArray;
     }
 
+    @Override
     public void saveRecipeToFile(String recipeName,
                                  String recipeTime,
                                  Map<String, String> recipeIngredients,
