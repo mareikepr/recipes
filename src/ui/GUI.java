@@ -11,7 +11,7 @@ import javax.swing.*;
 
 public class GUI {
 
-    private final RecipeService recipeService;
+    private RecipeService recipeService;
 
     // Start menu frame
     JFrame myFrame = new JFrame("Start menu - Recipes");
@@ -20,9 +20,8 @@ public class GUI {
     JButton myStartButton = new JButton("Recipes!");
 
     // Frame of collected recipes
-    JFrame myRecipeFrame = new JFrame("Recipes");
-    JPanel myRecipePanel = new JPanel();
-    JLabel myRecipeLabel = new JLabel();
+    JFrame myRecipeFrame;
+
     JButton myAddButton = new JButton("Add new recipe");
 
     JFrame myAddFrame = new JFrame("Add recipe");
@@ -55,24 +54,12 @@ public class GUI {
         //myStartButton.addActionListener(new StartButtonActionListener());
 
         // Options
-        myStartButton.addActionListener(e -> startAction());         // Lambda
-        myStartButton.addActionListener(this::actionPerformed);      // method reference (lambda expression for single method)
-
-        myStartButton.addActionListener(this::startActionLambda);
-        myStartButton.addActionListener(e -> startActionLambda(e));
-
-
+        myStartButton.addActionListener(this::actionPerformed);
         myFrame.setSize(400, 400);
         myFrame.setVisible(true);
 
         // Recipe window
-        myRecipeFrame.add(myRecipePanel);
-        myRecipePanel.add(myRecipeLabel);
-        String [] recipeNamesListStringArray = recipeService.getRecipeNames().toArray(String[]::new);
-        JList<String> myRecipeNamesList = new JList<>(recipeNamesListStringArray);
-        myRecipePanel.add(myRecipeNamesList);
-        myRecipePanel.add(myAddButton);
-        myRecipeLabel.setText(("Recipe"));
+        myRecipeFrame = makeNewRecipeFrame(recipeService);
 
         // With new class:
         //myAddButton.addActionListener(new AddButtonActionListener());
@@ -88,7 +75,6 @@ public class GUI {
         };
         myAddButton.addActionListener(al);
 
-        myRecipeFrame.setSize(600, 400);
 
         // Add recipe window
         myAddFrame.setSize(400, 600);
@@ -156,7 +142,6 @@ public class GUI {
         mySaveButton.addActionListener( a -> saveAction());
 
         myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        myRecipeFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         myAddFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
@@ -187,6 +172,13 @@ public class GUI {
 
         recipeService.addRecipeToCollectionAndFile(name, time, ingredients, instructions);
         recipeService.printCollection();
+        myAddFrame.setVisible(false);
+
+        // myRecipeFrame erneuern
+        myRecipeFrame.setVisible(false);
+        myRecipeFrame = makeNewRecipeFrame(recipeService);
+        myRecipeFrame.setVisible(true);
+
     }
 
     /*
@@ -218,4 +210,25 @@ public class GUI {
         }
     }
     */
+
+    private JFrame makeNewRecipeFrame(RecipeService recipeService) {
+
+        JFrame myRecipeFrame = new JFrame("Recipes");
+        JPanel myRecipePanel = new JPanel();
+        JLabel myRecipeLabel = new JLabel();
+
+        myRecipeFrame.setSize(600, 400);
+
+        myRecipeFrame.add(myRecipePanel);
+        myRecipePanel.add(myRecipeLabel);
+        String [] recipeNamesListStringArray = recipeService.getRecipeNames().toArray(String[]::new);
+        JList<String> myRecipeNamesList = new JList<>(recipeNamesListStringArray);
+        myRecipePanel.add(myRecipeNamesList);
+        myRecipePanel.add(myAddButton);
+        myRecipeLabel.setText(("Recipe"));
+
+        myRecipeFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        return myRecipeFrame;
+    }
 }

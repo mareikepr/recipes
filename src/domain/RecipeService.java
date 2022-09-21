@@ -25,7 +25,9 @@ public class RecipeService {
 
     public void loadAllRecipes () {
 
+
         recipeCollection = recipeRepository.loadRecipeCollectionFromFile();
+
     }
 
     public void addRecipeToCollectionAndFile (String recipeName,
@@ -35,7 +37,7 @@ public class RecipeService {
 
         RecipeIngredients ingredientsList = ingredientsStringToList(recipeIngredients);
 
-        Map<String, String> ingredientsMap = ingredientsList.stream().collect(Collectors.toMap(RecipeIngredient::getAmount, RecipeIngredient::getAmount));
+        Map<String, String> ingredientsMap = ingredientsList.stream().collect(Collectors.toMap(RecipeIngredient::getName, RecipeIngredient::getAmount));
 
         Recipe recipe = new Recipe(recipeName, recipeTime, ingredientsList, recipeInstructions);
 
@@ -50,8 +52,13 @@ public class RecipeService {
         List<String> shoppingList = new ArrayList<>();
 
         for (String s : recipeList) {
-            Recipe recipe = recipeCollection.searchAndGetRecipe(s);
-            shoppingList.add(recipe.getIngredientsListString().toString());
+            Optional<Recipe> recipe = recipeCollection.searchAndGetRecipe(s);
+
+            if (recipe.isPresent()) {
+                shoppingList.add(recipe.get().getIngredientsListString().toString());
+            } else {
+                System.out.println("Recipe " + s + " not found.");
+            }
         }
 
         shoppingListServiceInterface.printShoppingList(shoppingList);
@@ -69,9 +76,9 @@ public class RecipeService {
 
         for (String splitIngredient : splitIngredients) {
 
-            String name = splitIngredient.split("\s")[0];
-            String amount = splitIngredient.split("\s")[1];
-            ingredientsList.add(new RecipeIngredient(amount, name));
+            String name = splitIngredient.split("\s")[1];
+            String amount = splitIngredient.split("\s")[0];
+            ingredientsList.add(new RecipeIngredient(name, amount));
         }
 
         return ingredientsList;

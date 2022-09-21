@@ -23,9 +23,13 @@ public class RecipeCollection {
         allRecipes.stream().filter( r -> compareRecipeNames(r, recipeName)).forEach(this::printRecipe); // method ref
     }
 
-    public Recipe searchAndGetRecipe(String recipeName) {
+    public Optional<Recipe> searchAndGetRecipe(String recipeName) {
 
-        return allRecipes.stream().filter(r -> compareRecipeNames(r, recipeName)).findAny().get();
+         if (allRecipes.stream().filter(r -> compareRecipeNames(r, recipeName)).findAny().isEmpty()) {
+             return Optional.empty();
+         } else {
+             return Optional.of(allRecipes.stream().filter(r -> compareRecipeNames(r, recipeName)).findAny().get());
+         }
     }
 
     private boolean compareRecipeNames(Recipe recipe, String recipeKeyword) {

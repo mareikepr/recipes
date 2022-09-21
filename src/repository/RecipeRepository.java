@@ -30,11 +30,13 @@ public class RecipeRepository implements RecipeRepositoryInterface {
             for (int numRead; (numRead = reader.read(buffer, 0, buffer.length)) > 0; ) {
                 out.append(buffer, 0, numRead);
             }
-
             return out.toString();
-        } catch (IOException ex) {
+        } catch (FileNotFoundException ex) {
             ex.printStackTrace();
-            return null;
+            new File(fileName);
+            return "";
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -42,11 +44,14 @@ public class RecipeRepository implements RecipeRepositoryInterface {
 
         RecipeCollection recipeCollection = new RecipeCollection();
 
-        List<String> recipeStringList = List.of(splitFileToRecipes(fileContent));
+        if (!fileContent.equals("")) {
 
-        for (String recipeString : recipeStringList) {
-            Recipe recipe = extractRecipeFromString(recipeString);
-            recipeCollection.add(recipe);
+            List<String> recipeStringList = List.of(splitFileToRecipes(fileContent));
+
+            for (String recipeString : recipeStringList) {
+                Recipe recipe = extractRecipeFromString(recipeString);
+                recipeCollection.add(recipe);
+            }
         }
 
         return recipeCollection;
@@ -73,8 +78,8 @@ public class RecipeRepository implements RecipeRepositoryInterface {
 
         for ( String item : ingredientsArray ) {
 
-            String ingrName = item.split("=")[0];
-            String ingrAmount = item.split("=")[1];
+            String ingrName = item.split("=")[1];
+            String ingrAmount = item.split("=")[0];
 
             ingredientsMap.add(new RecipeIngredient(ingrName, ingrAmount));
         }
@@ -85,8 +90,7 @@ public class RecipeRepository implements RecipeRepositoryInterface {
     private String[] splitFileToRecipes(String fileContent) {
 
         String[] recipeArray = fileContent.split("###");
-        recipeArray = Arrays.copyOfRange(recipeArray, 1, recipeArray.length - 1);
-
+        recipeArray = Arrays.copyOfRange(recipeArray, 1, recipeArray.length);
         return recipeArray;
     }
 
